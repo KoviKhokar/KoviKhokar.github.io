@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html> 
+
+    <head>
+        <!--Add the Title below-->
+        <title>Walker</title>
+        <!--Add the Title above--> 
+        <style>
+            /*Add the CSS below*/
+            canvas{border:30px ridge cyan;}
+            html{background-color: deeppink;
+                font-family: cursive;}
+            h1{color:indigo;}
+            #love{background-color: red;
+                 color: whitesmoke;}
+            /*Add the CSS above*/
+        </style>
+    </head>
+
+    <body>
+        <!--Add the HTML below-->
+        <h1>This is a walker in ellipse shape and moves randomly which changes its height and width with its x and y coordinates and changes its color with its x,y coordinates and mouse's x,y coordinates !!!</h1>
+        <h6>Made with <span id="love">LOVE</span> by Kovid Khokar .</h6>
+        <!--Add the HTML above-->
+        <canvas id="mycanvas"></canvas> 
+    </body>
+
+    <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+ 
+    <script>
+
+        var sketchProc = function(processingInstance){
+        with (processingInstance){
+            size(800, 400); 
+            frameRate(60);
+                
+            //Add the JS below
+                
+            var Walker = function() {
+            this.x = width/2;
+            this.y = height/2;
+            this.tx = 0;
+            this.ty = 10000;
+            };
+
+            Walker.prototype.display = function() {
+            stroke(0, 0, 0);
+            fill(this.x*400/width,this.y*400/height,mouseX/255*mouseY);
+            ellipse(this.x, this.y,this.x,this.y);
+            };
+
+            Walker.prototype.walk = function() {
+            this.x = map(noise(this.tx), 0, 1, 0, width);
+            this.y = map(noise(this.ty), 0, 1, 0, height);
+
+            this.tx += random(0.0001,0.0090);
+            this.ty += random(0.0001,0.0090);
+            };
+
+            var w = new Walker();
+
+            var draw = function() {
+            w.walk();
+            w.display();
+            };
+
+            //Add the JS above
+        }};
+        var canvas = document.getElementById("mycanvas"); 
+        var processingInstance = new Processing(canvas, sketchProc); 
+
+    </script>
+
+</html>
