@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html> 
+
+    <head>
+        <!--Add the Title below-->
+        <title>Make A Nest!!</title>
+        <!--Add the Title above--> 
+        <style>
+            /*Add the CSS below*/
+            html{background-color:rgb(85, 10, 85);
+                font-family:cursive;}
+            canvas{margin:50px;
+                  border:10px ridge goldenrod;}
+            .spacing{color:rgb(85, 10, 85);}
+            #head{background-color: darkorange;
+                color:cyan;}
+            p{color:rgb(255, 0, 191)}
+            input{float:left}
+            /*Add the CSS above*/
+        </style>
+    </head>
+
+    <body>
+        <!--Add the HTML below-->
+        <h1><span class="spacing">_____________________</span><span id="head">Make A Nest!!</span></h1>
+
+        <button type="button" onclick="alert('UP Arrow Key : Go up              DOWN Arrow Key : Go down              LEFT Arrow Key : Stop moving               RIGHT Arrow Key : Dash forward then come back')">Blue Bird Controls</button>
+        <button type="button" onclick="alert('W Alphabet Key : Go up            S Alphabet Key : Go down              A Alphabet Key : Stop moving               D Alphabet Key : Dash forward then come back')">Yellow Bird Controls</button>
+        <button type="button" onclick="alert('U Alphabet Key : Go up            J Alphabet Key : Go down              H Alphabet Key : Stop moving               K Alphabet Key : Dash forward then come back')">Red Bird Controls</button>
+
+        
+        <p>Collect more sticks than your rival/s for making a nest for your bird !!!</p>
+        <!--Add the HTML above-->
+        <canvas id="mycanvas"></canvas> 
+    </body>
+
+    <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+ 
+    <script>
+
+        var sketchProc = function(processingInstance){
+        with (processingInstance){
+            size(1000, 500); 
+            frameRate(150);
+                
+            //Add the JS below
+
+            var Bird = function(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color=color;
+            this.sticks = 0;
+            };
+
+            Bird.prototype.draw = function() {
+            this.y = constrain(this.y, 0, height*0.84);
+            fill(this.color);
+            rect(this.x, this.y, 60, 30);};
+
+            Bird.prototype.fly = function() {
+            this.y -= 5;
+            };
+
+            
+            Bird.prototype.fall = function() {
+            this.y += 3;
+            };
+
+
+            Bird.prototype.dashforward = function() {
+            this.x += 40;};
+
+            Bird.prototype.dashback = function() {
+            this.x -= 40;};
+
+            Bird.prototype.checkForStickGrab = function(stick) {
+                    
+                if (
+                    //top left
+                    ((stick.x >= this.x && stick.x <= this.x + 60) &&
+                    (stick.y >= this.y && stick.y <= this.y + 30))||
+                    //top right
+                    ((stick.x >= this.x-5 && stick.x <= this.x + 55) &&
+                    (stick.y >= this.y && stick.y <= this.y + 30))||
+                    //bottom left
+                    ((stick.x >= this.x && stick.x <= this.x + 60) &&
+                    (stick.y+40 >= this.y && stick.y+10 <= this.y))||
+                    //bottom right
+                    ((stick.x-5 >= this.x && stick.x <= this.x + 55) &&
+                    (stick.y+40 >= this.y && stick.y+10 <= this.y))
+                    
+                    ) {
+
+
+                    stick.y = -400;
+                    this.sticks++;
+                }
+            };
+
+            var Stick = function(x, y) {
+            this.x = x;
+            this.y = y;
+            };
+
+            Stick.prototype.draw = function() {
+            fill(89, 71, 0);
+            rect(this.x, this.y, 5, 40);
+            };  
+
+            var bird1 = new Bird(width/4, height/2.5,color(0,100,255));
+            var bird2 = new Bird(width/4, height/3,color(255,255,50));
+            var bird3 = new Bird(width/4, height/3.725,color(255,0,0));
+    
+
+            var sticks = [];
+            for (var i = 0; i < 500; i++) {  
+                sticks.push(new Stick(i * 40 +360, random(80, height*0.818)));
+            }
+
+            var grassXs = [];
+            for (var i = 0; i < 75; i++) { 
+                grassXs.push(i*15);
+            }
+
+
+
+            draw = function() {
+
+
+
+
+
+
+    
+                //Main Game Scene
+
+
+                background(227, 254, 255);
+                fill(130, 79, 43);
+                rectMode(CORNER);
+                rect(0, height*0.90, width, height*0.10);
+                
+                for (var i = 0; i < grassXs.length; i++) {
+                    fill(0,100,0);
+                    rect(grassXs[i],height*0.819, 10, 40);
+                    grassXs[i] -= 1;
+                    if (grassXs[i] <= -15) {
+                        grassXs[i] = width;
+                    }
+                }
+                
+                for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i]);
+                    bird3.checkForStickGrab(sticks[i]);
+                    sticks[i].x -= 1;
+                }
+                
+                textSize(18);
+                text("Blue Score : " + (bird1.sticks/sticks.length)*100+"%", 10, 30);
+                text("Yellow Score : " + (bird2.sticks/sticks.length)*100+"%", 360, 30);
+                text("Red Score : " + (bird3.sticks/sticks.length)*100+"%", 710, 30);
+                
+                if (keyCode === 38) {
+                    bird1.fly();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}} 
+
+                if(keyCode === 40){
+                    bird1.fall(); bird1.fall();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}}
+
+                if(keyCode === 39){
+                    bird1.dashforward();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}
+                    bird1.dashback();}
+
+                else{for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}}
+                bird1.draw();
+
+
+
+                if (keyCode === 87) {
+                    bird2.fly();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}} 
+
+                if(keyCode === 83){
+                    bird2.fall(); bird2.fall();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}}
+
+                if(keyCode === 68){
+                    bird2.dashforward();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}
+                    bird2.dashback()}
+
+
+                     else{for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}}   
+                bird2.draw();
+
+
+
+                if (keyCode === 85) {
+                    bird3.fly();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}} 
+
+                if(keyCode === 74){
+                    bird3.fall(); bird3.fall();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}}
+
+                if(keyCode === 75){
+                    bird3.dashforward();
+                    for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}
+                    bird3.dashback();}
+
+
+                else{for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}}
+                bird3.draw();
+
+                for (var i = 0; i < sticks.length; i++) {
+                    sticks[i].draw();
+                    bird1.checkForStickGrab(sticks[i])
+                    bird2.checkForStickGrab(sticks[i])
+                    bird3.checkForStickGrab(sticks[i])
+                    sticks[i].x -= 1;}
+            };
+            //Add the JS above
+        }};
+        var canvas = document.getElementById("mycanvas"); 
+        var processingInstance = new Processing(canvas, sketchProc); 
+
+    </script>
+
+</html>

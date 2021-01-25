@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html> 
+
+    <head>
+        <!--Add the Title below-->
+        <title>Kill The Zombies !!!</title>
+        <!--Add the Title above--> 
+        <style>
+            /*Add the CSS below*/
+            html{background-color: rgb(2, 51, 2);
+                font-family: monospace;}
+            h1{color:rgb(155, 7, 37);}
+            h4{color:hotpink;}
+
+            #controls{background-color:deepskyblue;
+                     color:whitesmoke;}
+            #orange{background-color:orangered;
+                   color:whitesmoke;}
+            #startgame{background-color:peru;
+                      color:whitesmoke;}
+            #tip{background-color: rgb(186, 51, 212);
+                color:whitesmoke;}
+            #mycanvas{border:20px ridge deeppink;}
+            #love{background-color:red;
+                 color:whitesmoke;}
+            /*Add the CSS above*/
+        </style>
+    </head>
+
+    <body>
+        <!--Add the HTML below-->
+        <h1>Kill The Zombies !!!</h1>
+        <h4><span id="controls">F5:PLAY-AGAIN  Q:START  W:UP  A:LEFT  S:DOWN  D:RIGHT  ANY-OTHER-KEY:STOP  MOUSE-CLICK:SHOOT-SNIPER</span></h4>
+        <h4><span id="orange">Mouse recommended</span></h4>
+        <h4><span id="startgame">Start the game by clicking on the canvas below then pressing the Q key and if you want to play the game again click anywhere out of the canvas on your sreen then press the F5 key .</span></h4>
+        <h4><span id="tip">Play this game in full screen for better experience</span></h4>
+        <!--Add the HTML above-->
+        <canvas id="mycanvas"></canvas> 
+    </body>
+
+    <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+ 
+    <script>
+
+        var sketchProc = function(processingInstance){
+        with (processingInstance){
+            size(1200, 600); 
+            frameRate(60);
+                
+            //Add the JS below
+            var gameStart=false;
+            var gameOver=false;
+
+            textSize(50);
+            fill(0,0,0);
+            text("START ME BY PRESSING THE Q ALPHABET KEY",25,height/2+25);
+
+            var Player=function(x,y,skinColor,shirtColor){
+                this.x=x;
+                this.y=y;
+                this.skinColor=skinColor;
+                this.shirtColor=shirtColor;
+                this.score=0;
+                this.health=600;
+            }
+
+                Player.prototype.draw=function(){
+                    noStroke()
+
+                    this.y = constrain(this.y, 0, height-200);
+                    this.x = constrain(this.x, 180, width-90);
+
+                    fill(this.skinColor);
+                    rect(this.x,this.y,30,30);
+                    rect(this.x-60,this.y+50,150,10);
+                    rect(this.x-10,this.y+130,10,70);
+                    rect(this.x+30,this.y+130,10,70);
+
+                    fill(this.shirtColor);
+                    rect(this.x-20,this.y+30,70,100);
+
+                    fill(0,0,0);
+                    textSize(20);
+                    text("I KILL",this.x-10,this.y+50);
+                    text("ZOMB-",this.x-18,this.y+75);
+                    text("IES",this.x-2,this.y+100);
+                    ellipse(this.x+10,this.y+10,10,10);
+                    ellipse(this.x+20,this.y+10,10,10);
+                    fill(255,60,0);
+                    ellipse(this.x+15,this.y+20,15,10);
+                }
+
+                Player.prototype.up=function(){
+                    if(keyCode===87){
+                    this.y-=8;}
+                }
+
+                Player.prototype.down=function(){
+                    if(keyCode===83){
+                    this.y+=8;}
+                }
+
+                Player.prototype.left=function(){
+                    if(keyCode===65){
+                    this.x-=8;}
+                }
+
+                Player.prototype.right=function(){
+                    if(keyCode===68){
+                    this.x+=8;}
+                }
+
+                Player.prototype.drawSniper=function(){
+                    fill(0,255,255);
+                    rect(this.x-90,this.y+40,30,70);
+                    fill(255,255,0);
+                    rect(this.x-190,this.y+40,100,30);
+                    fill(255,0,255);
+                    rect(this.x-130,this.y+70,20,20);
+                }
+            
+
+            var Zombie=function(x,y,bodyColor){
+                this.x=x;
+                this.y=y;
+                this.bodyColor=bodyColor;
+                this.health=3;
+                this.initx=this.x;
+                this.inity=this.y;
+            }
+                Zombie.prototype.draw=function(){
+                    fill(this.bodyColor);
+                    ellipse(this.x,this.y,40,40);
+                    rect(this.x-80,this.y+40,160,30);
+                    rect(this.x-40,this.y+20,80,100);
+                    rect(this.x-40,this.y+120,20,80);
+                    rect(this.x+20,this.y+120,20,80);
+
+                    fill(0,0,0);
+                    ellipse(this.x-10,this.y-5,10,10);
+                    ellipse(this.x+10,this.y-5,10,10);
+
+                    fill(165,42,42);
+                    ellipse(this.x,this.y+10,15,10);
+                }
+
+                Zombie.prototype.move=function(){
+                    if(this.x>you.x){
+                        this.x-=1;
+                    }
+                    if(this.x<you.x){
+                        this.x+=1;
+                    }
+                    if(this.y>you.y){
+                        this.y-=1;
+                    }
+                    if(this.y<you.y){
+                        this.y+=1;
+                    }
+                }
+
+                Zombie.prototype.attack=function(){
+                    //if on zombie face(circle) do 2 damage
+                    if(
+                        //on player face(rectangle)
+                        (
+                            //top left
+                            (you.x<this.x+20&&you.x>this.x-20&&
+                            you.y<this.y+20&&you.y>this.y-20)||
+                            //top right
+                            (you.x+30<this.x+20&&you.x+30>this.x-20&&
+                            you.y<this.y+20&&you.y>this.y-20)||
+                            //bottom left
+                            (you.x<this.x+20&&you.x>this.x-20&&
+                            you.y+30<this.y+20&&you.y+30>this.y-20)||
+                            //bottom right
+                            (you.x+30<this.x+20&&you.x+30>this.x-20&&
+                            you.y+30<this.y+20&&you.y+30>this.y-20)
+                        )||
+                        //on player hand(rectangle)
+                        (
+                            //top left
+                            (you.x-60<this.x+20&&you.x-60>this.x-20&&
+                            you.y+50<this.y+20&&you.y+50>this.y-20)||
+                            //top right
+                            (you.x-60+150<this.x+20&&you.x-60+150>this.x-20&&
+                            you.y+50<this.y+20&&you.y+50>this.y-20)||
+                            //bottom left
+                            (you.x-60<this.x+20&&you.x-60>this.x-20&&
+                            you.y+50+10<this.y+20&&you.y+50+10>this.y-20)||
+                            //bottom right
+                            (you.x-60+150<this.x+20&&you.x-60+150>this.x-20&&
+                            you.y+50+10<this.y+20&&you.y+50+10>this.y-20)
+                        )||
+                        //on player legs both considered as one big rectangle
+                        (
+                            //top left
+                            (you.x-10<this.x+20&&you.x-10>this.x-20&&
+                            you.y+130<this.y+20&&you.y+130>this.y-20)||
+                            //top right
+                            (you.x-10+50<this.x+20&&you.x-10+50>this.x-20&&
+                            you.y+130<this.y+20&&you.y+130>this.y-20)||
+                            //bottom left
+                            (you.x-10<this.x+20&&you.x-10>this.x-20&&
+                            you.y+130+70<this.y+20&&you.y+130+70>this.y-20)||
+                            //bottom right
+                            (you.x-10+50<this.x+20&&you.x-10+50>this.x-20&&
+                            you.y+130+70<this.y+20&&you.y+130+70>this.y-20)
+                        )
+                    ){
+                        you.health-=2;}
+
+
+
+                    //if on zombie hands do 2 damage
+                        if(
+                        //on player face(rectangle)
+                        (
+                            //top left
+                            (you.x<this.x+160-80&&you.x>this.x-80&&
+                            you.y<this.y+30+40&&you.y>this.y+40)||
+                            //top right
+                            (you.x+30<this.x+160-80&&you.x+30-80>this.x&&
+                            you.y<this.y+30+40&&you.y>this.y+40)||
+                            //bottom left
+                            (you.x<this.x+160-80&&you.x>this.x-80&&
+                            you.y+30<this.y+30+40&&you.y+30>this.y+40)||
+                            //bottom right
+                            (you.x+30<this.x+160-80&&you.x+30>this.x-80&&
+                            you.y+30<this.y+30+40&&you.y+30>this.y+40)
+                        )||
+                        //on player hand(rectangle)
+                        (
+                            //top left
+                            (you.x-60<this.x+160-80&&you.x-60>this.x-80&&
+                            you.y+50<this.y+30+40&&you.y+50>this.y+40)||
+                            //top right
+                            (you.x-60+150<this.x+160-80&&you.x-60+150>this.x-80&&
+                            you.y+50<this.y+40+30&&you.y+50>this.y+40)||
+                            //bottom left
+                            (you.x-60<this.x+160-80&&you.x-60>this.x-80&&
+                            you.y+50+10<this.y+30+40&&you.y+50+10>this.y+40)||
+                            //bottom right
+                            (you.x-60+150<this.x+160-80&&you.x-60+150>this.x-80&&
+                            you.y+50+10<this.y+30+40&&you.y+50+10>this.y+40)
+                        )||
+                        //on player legs both considered as one big rectangle
+                        (
+                            //top left
+                            (you.x-10<this.x+160-80&&you.x-10>this.x-80&&
+                            you.y+130<this.y+30+40&&you.y+130>this.y+40)||
+                            //top right
+                            (you.x-10+50<this.x+160-80&&you.x-10+50>this.x-80&&
+                            you.y+130<this.y+30+40&&you.y+130>this.y+40)||
+                            //bottom left
+                            (you.x-10<this.x+160-80&&you.x-10>this.x-80&&
+                            you.y+130+70<this.y+30+40&&you.y+130+70>this.y+40)||
+                            //bottom right
+                            (you.x-10+50<this.x+160-80&&you.x-10+50>this.x-80&&
+                            you.y+130+70<this.y+30+40&&you.y+130+70>this.y+40)
+                        )
+                    ){
+                        you.health-=2;}
+
+                        //if on zombie legs both considered as one big rectangle do 1 damage(Zombies aren't footballers;Are they ?? )
+                        if(
+                        //on player face(rectangle)
+                        (
+                            //top left
+                            (you.x<this.x-40+80&&you.x>this.x-40&&
+                            you.y<this.y+120+80&&you.y>this.y+120)||
+                            //top right
+                            (you.x+30<this.x-40+80&&you.x+30>this.x-40&&
+                            you.y<this.y+120+80&&you.y>this.y+120)||
+                            //bottom left
+                            (you.x<this.x-40+80&&you.x>this.x-40&&
+                            you.y+30<this.y+120+80&&you.y+30>this.y+120)||
+                            //bottom right
+                            (you.x+30<this.x-40+80&&you.x+30>this.x-40&&
+                            you.y+30<this.y+120+80&&you.y+30>this.y+120)
+                        )||
+                        //on player hand(rectangle)
+                        (
+                            //top left
+                            (you.x-60<this.x-40+80&&you.x-60>this.x-40&&
+                            you.y+50<this.y+120+80&&you.y+50>this.y+120)||
+                            //top right
+                            (you.x-60+150<this.x-40+80&&you.x-60+150>this.x-40&&
+                            you.y+50<this.y+120+80&&you.y+50>this.y+120)||
+                            //bottom left
+                            (you.x-60<this.x-40+80&&you.x-60>this.x-40&&
+                            you.y+50+10<this.y+120+80&&you.y+50+10>this.y+120)||
+                            //bottom right
+                            (you.x-60+150<this.x-40+80&&you.x-60+150>this.x-40&&
+                            you.y+50+10<this.y+120+80&&you.y+50+10>this.y+120)
+                        )||
+                        //on player legs both considered as one big rectangle
+                        (
+                            //top left
+                            (you.x-10<this.x-40+80&&you.x-10>this.x-40&&
+                            you.y+130<this.y+120+80&&you.y+130>this.y+120)||
+                            //top right
+                            (you.x-10+50<this.x-40+80&&you.x-10+50>this.x-40&&
+                            you.y+130<this.y+120+80&&you.y+130>this.y+120)||
+                            //bottom left
+                            (you.x-10<this.x-40+80&&you.x-10>this.x-40&&
+                            you.y+130+70<this.y+120+80&&you.y+130+70>this.y+120)||
+                            //bottom right
+                            (you.x-10+50<this.x-40+80&&you.x-10+50>this.x-40&&
+                            you.y+130+70<this.y+120+80&&you.y+130+70>this.y+120)
+                        )
+                    ){
+                        you.health-=1;}
+
+
+                }
+
+                Zombie.prototype.checkIfIAmDead=function(){
+                    //if i was shooted with sniper then do myself 3 damage which is a kill so increase player score by 1 and fully restore my health, set my x,y to initial x,y +random(-200,200)
+                    if (
+                        (mouseX<this.x-40+80&&mouseX>this.x-40&&
+                        mouseY<this.y+120+80&&mouseY>this.y+120)||
+
+                        (mouseX<this.x+160-80&&mouseX>this.x-80&&
+                        mouseY<this.y+30+40&&mouseY>this.y+40)||
+
+                        (mouseX<this.x+20&&mouseX>this.x-20&&
+                        mouseY<this.y+20&&mouseY>this.y-20)||
+
+                        (mouseX<this.x-40+80&&mouseX>this.x-40&&
+                        mouseY<this.y+20+100&&mouseY>this.y+20)
+
+                    ){
+                        this.x=this.initx;
+                        this.y=this.inity;
+                        you.score+=1;
+                        this.health=3;    
+                    }
+
+                }
+
+
+            var you=new Player(width/4,height/4,color(165,42,42),color(255,69,0));
+            
+            
+            //onsreen zombie
+            var zombie1=new Zombie(width/1.2,height/2,color(255,255,255));                 //Zombies
+            //right to the canvas zombies
+            var zombie2=new Zombie(width*random(1.6,7),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));                 
+            var zombie3=new Zombie(width*random(1.6,7),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie4=new Zombie(width*random(1.6,7),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie5=new Zombie(width*random(1.6,7),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie6=new Zombie(width*random(1.6,7),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie7=new Zombie(width*random(1.6,7),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie8=new Zombie(width*random(1.6,7),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie9=new Zombie(width*random(1.6,7),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));                 //1
+            //down to the canvas zombies
+            var zombie10=new Zombie(width*random(0,1),height*random(1.6,7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie11=new Zombie(width*random(0,1),height*random(1.6,7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie12=new Zombie(width*random(0,1),height*random(1.6,7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie13=new Zombie(width*random(0,1),height*random(1.6,7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie14=new Zombie(width*random(0,1),height*random(1.6,7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie15=new Zombie(width*random(0,1),height*random(1.6,7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie16=new Zombie(width*random(0,1),height*random(1.6,7),color(random(0,255),random(0,255),random(0,255)));
+            //up to the canvas zombies
+            var zombie17=new Zombie(width*random(0,1),height*random(-1.6,-7),color(random(0,255),random(0,255),random(0,255)));                //to
+            var zombie18=new Zombie(width*random(0,1),height*random(-1.6,-7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie19=new Zombie(width*random(0,1),height*random(-1.6,-7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie20=new Zombie(width*random(0,1),height*random(-1.6,-7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie21=new Zombie(width*random(0,1),height*random(-1.6,-7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie22=new Zombie(width*random(0,1),height*random(-1.6,-7),color(random(0,255),random(0,255),random(0,255)));
+            var zombie23=new Zombie(width*random(0,1),height*random(-1.6,-7),color(random(0,255),random(0,255),random(0,255)));
+            //left to the canvas zombies
+            var zombie24=new Zombie(width*random(-7,-1.6),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie25=new Zombie(width*random(-7,-1.6),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie26=new Zombie(width*random(-7,-1.6),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));                //30
+            var zombie27=new Zombie(width*random(-7,-1.6),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie28=new Zombie(width*random(-7,-1.6),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie29=new Zombie(width*random(-7,-1.6),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+            var zombie30=new Zombie(width*random(-7,-1.6),height*random(0,1),color(random(0,255),random(0,255),random(0,255)));
+
+            draw=function(){
+                if(keyCode===81||gameStart==true&&gameOver==false){
+
+                    gameStart=true;
+                
+                    background(255, 95, 95);
+
+                    you.draw();
+                    you.drawSniper();
+
+
+                    zombie1.move();
+                    zombie1.draw();
+                    zombie1.attack();
+
+                    zombie2.move();
+                    zombie2.draw();
+                    zombie2.attack();
+
+                    zombie3.move();
+                    zombie3.draw();
+                    zombie3.attack();
+
+                    zombie4.move();
+                    zombie4.draw();
+                    zombie4.attack();
+
+                    zombie5.move();
+                    zombie5.draw();
+                    zombie5.attack();
+
+                    zombie6.move();
+                    zombie6.draw();
+                    zombie6.attack();
+
+                    zombie7.move();
+                    zombie7.draw();
+                    zombie7.attack();
+
+                    zombie8.move();
+                    zombie8.draw();
+                    zombie8.attack();
+
+                    zombie9.move();
+                    zombie9.draw();
+                    zombie9.attack();
+
+                    zombie10.move();
+                    zombie10.draw();
+                    zombie10.attack();
+
+                    zombie11.move();
+                    zombie11.draw();
+                    zombie11.attack();
+
+                    zombie12.move();
+                    zombie12.draw();
+                    zombie12.attack();
+
+                    zombie13.move();
+                    zombie13.draw();
+                    zombie13.attack();
+
+                    zombie14.move();
+                    zombie14.draw();
+                    zombie14.attack();
+
+                    zombie15.move();
+                    zombie15.draw();
+                    zombie15.attack();
+
+                    zombie16.move();
+                    zombie16.draw();
+                    zombie16.attack();
+
+                    zombie17.move();
+                    zombie17.draw();
+                    zombie17.attack();
+
+                    zombie18.move();
+                    zombie18.draw();
+                    zombie18.attack();
+
+                    zombie19.move();
+                    zombie19.draw();
+                    zombie19.attack();
+
+                    zombie20.move();
+                    zombie20.draw();
+                    zombie20.attack();
+
+                    zombie21.move();
+                    zombie21.draw();
+                    zombie21.attack();
+
+                    zombie22.move();
+                    zombie22.draw();
+                    zombie22.attack();
+
+                    zombie23.move();
+                    zombie23.draw();
+                    zombie23.attack();
+
+                    zombie24.move();
+                    zombie24.draw();
+                    zombie24.attack();
+
+                    zombie25.move();
+                    zombie25.draw();
+                    zombie25.attack();
+
+                    zombie26.move();
+                    zombie26.draw();
+                    zombie26.attack();
+
+                    zombie27.move();
+                    zombie27.draw();
+                    zombie27.attack();
+
+                    zombie28.move();
+                    zombie28.draw();
+                    zombie28.attack();
+
+                    zombie29.move();
+                    zombie29.draw();
+                    zombie29.attack();
+
+                    zombie30.move();
+                    zombie30.draw();
+                    zombie30.attack();
+
+                    mouseClicked=function(){
+            
+                        zombie1.checkIfIAmDead();
+                        zombie2.checkIfIAmDead();
+                        zombie3.checkIfIAmDead();
+                        zombie4.checkIfIAmDead();
+                        zombie5.checkIfIAmDead();
+                        zombie6.checkIfIAmDead();
+                        zombie7.checkIfIAmDead();
+                        zombie8.checkIfIAmDead();
+                        zombie9.checkIfIAmDead();
+                        zombie10.checkIfIAmDead();
+                        zombie11.checkIfIAmDead();
+                        zombie12.checkIfIAmDead();
+                        zombie13.checkIfIAmDead();
+                        zombie14.checkIfIAmDead();
+                        zombie15.checkIfIAmDead();
+                        zombie16.checkIfIAmDead();
+                        zombie17.checkIfIAmDead();
+                        zombie18.checkIfIAmDead();
+                        zombie19.checkIfIAmDead();
+                        zombie20.checkIfIAmDead();
+                        zombie21.checkIfIAmDead();
+                        zombie22.checkIfIAmDead();
+                        zombie23.checkIfIAmDead();
+                        zombie24.checkIfIAmDead();
+                        zombie25.checkIfIAmDead();
+                        zombie26.checkIfIAmDead();
+                        zombie27.checkIfIAmDead();
+                        zombie28.checkIfIAmDead();
+                        zombie29.checkIfIAmDead();
+                        zombie30.checkIfIAmDead();
+                    };
+
+                    you.up();
+                    you.down();
+                    you.right();
+                    you.left();
+
+                    textSize(20);
+                    fill(0,0,0);
+                    text("Score :  "+you.score+" Zombies",0,20);
+
+                    fill(255,0,0);
+                    rect(width-640,10,600,50);
+                    fill(0,255,0);
+                    for(var i=0;i<you.health;i++){
+                        rect(i+(width-640),10,1,50);
+                    }
+                    if(you.health<1){
+                        textSize(60);
+                        fill(0,0,0);
+                        text("You are Dead after killing "+you.score+" zombies",60,60);
+                        gameOver=true;
+                    }
+
+                    strokeWeight(5);
+                    stroke(0,0,0);
+                    noFill();
+                    ellipse(mouseX,mouseY,20,20);
+                }
+            }
+            //Add the JS above
+        }};
+        var canvas = document.getElementById("mycanvas"); 
+        var processingInstance = new Processing(canvas, sketchProc); 
+
+    </script>
+    <h4>Made with <span id="love">LOVE</span> by Kovid Khokar 🥰🥰😁😁😎😎😇😇</h4>    
+</html>
