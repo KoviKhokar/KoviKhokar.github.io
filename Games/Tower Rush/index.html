@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html> 
+
+    <head>
+        <!--Add the Title below-->
+        <title>Tower Rush</title>
+        <!--Add the Title above--> 
+        <style>
+            /*Add the CSS below*/
+            html{text-align: center;
+                line-height:0.06em;}
+            canvas{border: 20px groove goldenrod;}
+            /*Add the CSS above*/
+        </style>
+    </head>
+
+    <body>
+        <!--Add the HTML below-->
+        <h1>Tower Rush</h1>
+        <h3>A Multiplayer Tower Defence Game</h3>
+        <!--Add the HTML above-->
+        <canvas id="mycanvas"></canvas> 
+    </body>
+
+    <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+ 
+    <script>
+
+        var sketchProc = function(processingInstance){
+        with (processingInstance){
+            size(1000, 500); 
+            frameRate(75);
+                
+            //Add the JS below
+            var gameStart=false;
+            textSize(30);
+            fill(0,0,0);
+            text("Start the game by clicking on the canvas then pressing the key Q",50,height/2);
+
+            var Mousepointer=function(position,color,playernum){
+                this.position=position;
+                this.color=color;
+                this.playernum=playernum;
+            }
+                Mousepointer.prototype.draw=function(){
+                    stroke(0,0,0);
+                    fill(this.color);
+                    triangle(this.position.x,this.position.y,this.position.x,this.position.y+35,this.position.x+25,this.position.y+25);
+                    fill(255,255,255)
+                    textSize(20);
+                    text(this.playernum,this.position.x+3,this.position.y+28)
+                }
+
+                Mousepointer.prototype.move=function(){
+                    if(this.playernum===1){
+                        if(keyCode==87){
+                            this.position.sub(0,1);
+                        }
+                        if(keyCode==83){
+                            this.position.add(0,1);
+                        }
+                        if(keyCode==65){
+                            this.position.sub(1,0);
+                        }
+                        if(keyCode==68){
+                            this.position.add(1,0);
+                        }
+                    }
+                    if(this.playernum===2){
+                        if(keyCode==38){
+                            this.position.sub(0,1);
+                        }
+                        if(keyCode==40){
+                            this.position.add(0,1);
+                        }
+                        if(keyCode==37){
+                            this.position.sub(1,0);
+                        }
+                        if(keyCode==39){
+                            this.position.add(1,0);
+                        }
+                    }
+                }
+
+            var Players=function(screenPos){
+                this.screenPos=screenPos;
+                this.gold=15;
+                this.income=1;
+                this.health=500;
+            }
+                Players.prototype.draw=function(){
+                    stroke(0,0,0);
+                    fill(255, 215, 0);
+                    textSize(40);
+                    text("  Gold:"+round(this.gold)+" Income/second:"+this.income,this.screenPos.x,this.screenPos.y+50);
+                    fill(0,225,255);
+                    rect(this.screenPos.x,this.screenPos.y+55,this.health,40);
+                    line(this.screenPos.x,this.screenPos.y,this.screenPos.x,height);
+                    line(this.screenPos.x,this.screenPos.y+105,width,this.screenPos.y+105);
+                    line(this.screenPos.x,this.screenPos.y+450,width,this.screenPos.y+450);
+
+                    if(this.gold+this.income/75<999){
+                        this.gold+=this.income/75;
+                    }
+                    else{this.gold=999}
+
+                    noStroke();
+                    fill(222,184,135);
+                    rect(this.screenPos.x+80,this.screenPos.y+105,20,330);
+                    rect(this.screenPos.x+80,this.screenPos.y+185,90,20);
+                    rect(this.screenPos.x+160,this.screenPos.y+145,20,100);
+                    rect(this.screenPos.x+100,this.screenPos.y+125,300,20);
+                    rect(this.screenPos.x+380,this.screenPos.y+125,20,160);
+                    rect(this.screenPos.x+300,this.screenPos.y+265,80,20);
+                    rect(this.screenPos.x+300,this.screenPos.y+285,20,50);
+                    rect(this.screenPos.x+320,this.screenPos.y+315,30,20);
+                    rect(this.screenPos.x+330,this.screenPos.y+335,20,20);
+                    rect(this.screenPos.x+240,this.screenPos.y+355,150,20);
+                    rect(this.screenPos.x+370,this.screenPos.y+355,20,60);
+                    rect(this.screenPos.x+90,this.screenPos.y+415,300,20);
+                    rect(this.screenPos.x+240,this.screenPos.y+225,20,130);
+                    rect(this.screenPos.x+160,this.screenPos.y+225,80,20);
+                    rect(this.screenPos.x+160,this.screenPos.y+430,20,20);
+                    rect(this.screenPos.x+100,this.screenPos.y+305,140,20);
+                    rect(this.screenPos.x+270,this.screenPos.y+125,20,230);
+
+                    fill(255,0,0);
+                    rect(this.screenPos.x,this.screenPos.y+450,250,80);
+                    fill(0,0,255);
+                    rect(this.screenPos.x+250,this.screenPos.y+450,250,80);
+                    textSize(44);
+                    fill(255,255,255);
+                    text("Troop send",this.screenPos.x+7,this.screenPos.y+487);
+                    text("$$Job$$",this.screenPos.x+280,this.screenPos.y+487);
+                }
+            
+            var p1mousepositionvector=new PVector(250,250);
+            var p1mousecolor=color(200,0,0);
+            var p1mouse=new Mousepointer(p1mousepositionvector,p1mousecolor,1);
+            var p1scrposvector=new PVector(0,0);
+            var p1=new Players(p1scrposvector);
+            var p2mousepositionvector=new PVector(750,250);
+            var p2mousecolor=color(0,0,200);
+            var p2mouse=new Mousepointer(p2mousepositionvector,p2mousecolor,2);
+            var p2scrposvector=new PVector(width/2,0);
+            var p2=new Players(p2scrposvector);
+            
+            draw=function(){
+                if(gameStart==true||keyCode===81){
+                    gameStart=true;
+                    background(0,185,0);
+                    p1.draw();
+                    p1mouse.draw();
+                    p1mouse.move();
+                    p2.draw();
+                    p2mouse.draw();
+                    p2mouse.move();
+                }
+            }
+            //Add the JS above
+        }};
+        var canvas = document.getElementById("mycanvas"); 
+        var processingInstance = new Processing(canvas, sketchProc); 
+
+    </script>
+
+</html>
